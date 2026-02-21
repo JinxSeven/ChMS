@@ -8,6 +8,8 @@ Install the dependencies:
 npm install
 ```
 
+Running this in `root` will install node_modules in both `root` and `apps/client`
+
 ### Development
 
 Start the development server with HMR:
