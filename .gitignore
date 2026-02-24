@@ -1,7 +1,2 @@
-.DS_Store
-.env
+.turbo
 /node_modules/
-
-# React Router
-/.react-router/
-/build/
