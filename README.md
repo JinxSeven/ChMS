@@ -1,5 +1,7 @@
 ## Getting Started
 
+This repo is configured with turbo, this allows you to run npm scripts like `npm i` and `npm run dev` directly from the root.
+
 ### Installation
 
 Install the dependencies:
@@ -7,8 +9,6 @@ Install the dependencies:
 ```bash
 npm install
 ```
-
-Running this in `root` will install node_modules in both `root` and `apps/client`
 
 ### Development
 
