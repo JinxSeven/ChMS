@@ -4,13 +4,13 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", "publish/**", "bin/**", "obj/**"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
     }
-  },
-  "check-types": {
-    "dependsOn": ["^check-types"]
-  },
-  "dev": {
-    "persistent": true,
-    "cache": false
   }
 }
