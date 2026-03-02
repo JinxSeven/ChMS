@@ -21,7 +21,10 @@ services:
     # This is causing an issue, so I've commented it out for now
     # Volumes help us persist data in table even when conatiners are deleted
     # volumes:
-    #   - chms-db:/var/lib/postgresql/data
+    #   - chms_db_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
-  
+
+volumes:
+  postgres_data:
+    name: chms_db_data
