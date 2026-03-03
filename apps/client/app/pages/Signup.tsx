@@ -2,7 +2,7 @@ import React, { useState, useEffect} from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/index";
-import { signup } from "../features/Auth/AuthSlice";
+import { signup } from "../features/Auth/authSlice";
 import AuthImage from '../images/auth-image.jpg';
 import AuthDecoration from '../images/auth-decoration.png';
 
