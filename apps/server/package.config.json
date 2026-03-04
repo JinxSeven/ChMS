@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "private": true,
+  "scripts": {
+    "dev": "dev-build && docker-filter && docker-compose",
+    "dev-build": "dotnet build ./ChMS.slnx",
+    "docker-filter": "docker ps --filter \"status=running\" --filter \"label=com.docker.compose.project=chms_server\" --format \"{{.ID}};{{.Label \"\"com.docker.compose.service\"\"}}",
+    "docker-compose": "docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.vs.debug.g.yml -p chms_server --ansi never up -d --build --remove-orphans",
+    "prod-build": "dotnet build -c Release",
+    "check-types": "dotnet build"
+  }
+}
