@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="api/api.csproj" />
+  <Project Path="api/Modules/ChMS.Modules.Auth/ChMS.Modules.Auth.csproj" Id="d5b944f9-a015-46e4-89dc-0da959395918" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
