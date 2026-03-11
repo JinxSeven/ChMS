@@ -8,7 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-	  <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +25,14 @@
     <PackageReference Include="Npgsql" Version="10.0.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Modules\ChMS.Modules.Auth\ChMS.Modules.Auth.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Compile Remove="Modules\ChMS.Modules.Auth\**\*.cs" />
   </ItemGroup>
 
 </Project>
