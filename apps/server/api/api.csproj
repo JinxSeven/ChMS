@@ -35,4 +35,8 @@
 	<Compile Remove="Modules\ChMS.Modules.Auth\**\*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

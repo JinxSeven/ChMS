@@ -8,6 +8,14 @@ You must run from the `apps/server/api/` directory (where `api.csproj` is).
 
 ### Creating a Migration
 
+If using `Visual Studio` use Package Manager Console (Shortcut: Alt + T, N, O)
+
+```bash
+Add-Migration <MigrationName> -StartupProject api -Project ChMS.Modules.<ModuleName> -Context <ModuleDbContext> -OutputDir Database\Migrations
+```
+
+Else
+
 ```bash
 dotnet ef migrations add <MigrationName> \
     --project Modules/ChMS.Modules.<ModuleName>/ChMS.Modules.<ModuleName>.csproj \
