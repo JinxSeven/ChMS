@@ -15,7 +15,7 @@ services:
     image: postgres:18.3
     container_name: chms_db
     environment:
-      - POSTGRES_DB:chms
+      - POSTGRES_DB=chms
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=letmein
     # This is causing an issue, so I've commented it out for now
