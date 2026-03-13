@@ -32,11 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Compile Remove="Controllers\**" />
 	<Compile Remove="Modules\ChMS.Modules.Auth\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
+	<Content Remove="Controllers\**" />
+	<EmbeddedResource Remove="Controllers\**" />
+	<None Remove="Controllers\**" />
   </ItemGroup>
 
 </Project>
