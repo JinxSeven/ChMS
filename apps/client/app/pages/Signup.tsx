@@ -2,19 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/index";
-import { signup } from "../features/Auth/authSlice";
+import { signUp } from "../features/auth/authSlice";
 import HouseOfGodImage from "../assets/house-of-god-2k.webp";
-import type { SignUpFormData } from "~/interfaces/auth.interface";
+import type { SignUpRequest } from "~/interfaces/auth.interface";
 // import AuthDecoration from "../images/auth-decoration.png";
 
 function Signup() {
   const dispatch = useDispatch<AppDispatch>();
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
 
   const { user, loading, error } = useSelector(
     (state: RootState) => state.auth,
   );
-  const [formData, setFormData] = useState<SignUpFormData>({
+
+  const [formData, setFormData] = useState<SignUpRequest>({
     name: "",
     email: "",
     role: "user",
@@ -22,7 +23,7 @@ function Signup() {
   });
 
   useEffect(() => {
-    if (user) Navigate("/");
+    if (user) navigate("/");
   }, []);
 
   const handleInputChange = (
@@ -37,8 +38,7 @@ function Signup() {
 
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
-    console.log(formData);
-    dispatch(signup(formData));
+    dispatch(signUp(formData));
   };
 
   return (
