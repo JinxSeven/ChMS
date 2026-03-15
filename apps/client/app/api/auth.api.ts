@@ -1,15 +1,11 @@
-import axios from "axios";
+import type { SignUpRequest, User } from "~/interfaces/auth.interface";
+import API from "./axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api", // need to change after backend setup
-  withCredentials: true,
-});
+const RESOURCE_NAME = "auth";
 
-export const loginApi = (data: { email: string; password: string }) =>
-  API.post("/auth/login", data);
+export const signInUser = (data: { email: string; password: string }) =>
+  API.post(`/${RESOURCE_NAME}/login`, data);
 
-export const signupApi = (data: {
-  name: string;
-  email: string;
-  password: string;
-}) => API.post("/auth/signup", data);
+// TODO: Return strongly typed response
+export const signUpUser = (data: SignUpRequest) =>
+  API.post(`/${RESOURCE_NAME}/signup`, data);
