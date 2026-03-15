@@ -182,20 +182,20 @@ function Signup() {
                       {loading ? "Creating..." : "Sign Up"}
                     </button>
 
-                    {formData.role === "admin" && (
-                      <div className="mt-5">
-                        <div className="bg-yellow-100 text-yellow-600 px-3 py-2 rounded">
-                          {/* <img
-                            className="inline h-4 flex-shrink-0 fill-current mr-2"
-                            src={}
-                          ></img> */}
-                          <span className="text-sm">
-                            Management accounts will be submitted for review and
-                            will be activated after approval.
-                          </span>
-                        </div>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-out ${
+                        formData.role === "admin"
+                          ? "opacity-100 translate-y-0 max-h-32 mt-5"
+                          : "opacity-0 -translate-y-2 max-h-0"
+                      }`}
+                    >
+                      <div className="bg-yellow-100 text-yellow-600 px-3 py-2 rounded">
+                        <span className="text-sm">
+                          Management accounts will be submitted for review and
+                          will be activated after approval.
+                        </span>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </form>
