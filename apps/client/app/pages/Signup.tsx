@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/index";
 import { signup } from "../features/Auth/authSlice";
-import ChurchImage from "../assets/house-of-god-2k.webp";
+import HouseOfGodImage from "../assets/house-of-god-2k.webp";
 import type { SignUpFormData } from "~/interfaces/auth.interface";
 // import AuthDecoration from "../images/auth-decoration.png";
 
@@ -95,7 +95,7 @@ function Signup() {
 
             <div className="w-96 max-w-sm mx-auto px-4 py-8">
               <h1 className="text-3xl text-gray-800 font-bold mb-6">
-                Create Your Family Account
+                Create your family account
               </h1>
               {/* Form */}
               <form onSubmit={handleSubmit}>
@@ -222,14 +222,14 @@ function Signup() {
         >
           <img
             className="object-cover object-center w-full h-full"
-            src={ChurchImage}
+            src={HouseOfGodImage}
             width="760"
             height="1024"
             alt="Authentication"
           />
           {/* <img
             className="absolute top-1/4 left-0 transform -translate-x-1/2 ml-8 hidden lg:block"
-            src={AuthDecoration}
+            src={}
             width="218"
             height="224"
             alt="Authentication decoration"
