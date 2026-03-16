@@ -111,6 +111,7 @@ function Signup() {
                       id="email"
                       className="form-input w-full"
                       type="email"
+                      required
                       value={formData.email}
                       onChange={handleInputChange}
                     />
@@ -127,6 +128,7 @@ function Signup() {
                       className="form-input w-full"
                       type="text"
                       value={formData.name}
+                      required
                       onChange={handleInputChange}
                     />
                   </div>
@@ -141,6 +143,7 @@ function Signup() {
                       id="role"
                       className="form-select w-full"
                       value={formData.role}
+                      required
                       onChange={handleInputChange}
                     >
                       <option value={"user"}>Member</option>
@@ -159,6 +162,7 @@ function Signup() {
                       className="form-input w-full"
                       type="password"
                       autoComplete="on"
+                      required
                       value={formData.password}
                       onChange={handleInputChange}
                     />
@@ -225,7 +229,7 @@ function Signup() {
             src={HouseOfGodImage}
             width="760"
             height="1024"
-            alt="Authentication"
+            alt="CSI-Immanuel-Church-Sirumugai"
           />
           {/* <img
             className="absolute top-1/4 left-0 transform -translate-x-1/2 ml-8 hidden lg:block"

@@ -74,6 +74,7 @@ function Signin() {
                       id="email"
                       className="form-input w-full"
                       type="email"
+                      required
                     />
                   </div>
                   <div>
@@ -85,6 +86,7 @@ function Signin() {
                     </label>
                     <input
                       id="password"
+                      required
                       className="form-input w-full"
                       type="password"
                       autoComplete="on"
