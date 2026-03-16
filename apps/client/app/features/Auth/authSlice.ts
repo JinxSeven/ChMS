@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { signInUser, signUpUser } from "../../api/auth.api";
-import type { AuthState, SignUpRequest } from "../../interfaces/auth.interface";
+import type {
+  AuthState,
+  SignInRequest,
+  SignUpRequest,
+} from "../../interfaces/auth.interface";
 
 const initialState: AuthState = {
   user: null,
@@ -10,10 +14,10 @@ const initialState: AuthState = {
 
 export const signIn = createAsyncThunk(
   "auth/signin",
-  async (data: { email: string; password: string }, thunkAPI) => {
+  async (data: SignInRequest, thunkAPI) => {
     try {
-      const response = await signInUser(data);
-      return response.data;
+      const loggedUser = await signInUser(data);
+      return loggedUser;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Login failed",
@@ -27,7 +31,7 @@ export const signUp = createAsyncThunk(
   async (data: SignUpRequest, thunkAPI) => {
     try {
       const response = await signUpUser(data);
-      return response.data;
+      return response;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Signup failed",
@@ -65,9 +69,8 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(signUp.fulfilled, (state, action) => {
+      .addCase(signUp.fulfilled, (state) => {
         state.loading = false;
-        state.user = action.payload;
       })
       .addCase(signUp.rejected, (state, action) => {
         state.loading = false;
