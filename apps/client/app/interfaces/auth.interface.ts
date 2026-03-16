@@ -1,3 +1,5 @@
+export type UserRole = "user" | "admin" | "superAdmin";
+
 export interface AuthState {
   user: User | null;
   loading: boolean;
@@ -11,7 +13,10 @@ export interface SignUpRequest {
   password: string;
 }
 
-export type UserRole = "user" | "admin" | "superAdmin";
+export interface SignInRequest {
+  email: string;
+  password: string;
+}
 
 export interface User {
   id: string;
