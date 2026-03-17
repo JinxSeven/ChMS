@@ -16,8 +16,7 @@ export const signIn = createAsyncThunk(
   "auth/signin",
   async (data: SignInRequest, thunkAPI) => {
     try {
-      const loggedUser = await signInUser(data);
-      return loggedUser;
+      return await signInUser(data);
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Login failed",
@@ -30,8 +29,7 @@ export const signUp = createAsyncThunk(
   "auth/signup",
   async (data: SignUpRequest, thunkAPI) => {
     try {
-      const response = await signUpUser(data);
-      return response;
+      return await signUpUser(data);
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Signup failed",
