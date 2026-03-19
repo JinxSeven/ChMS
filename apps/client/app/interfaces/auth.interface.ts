@@ -24,3 +24,7 @@ export interface User {
   email: string;
   role: UserRole;
 }
+
+export interface SignInResponse extends User {
+  accessToken: string;
+}
