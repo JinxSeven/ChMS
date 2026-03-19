@@ -36,9 +36,14 @@ function Signup() {
     });
   };
 
-  const handleSubmit = (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    dispatch(signUp(formData));
+    try {
+      await dispatch(signUp(formData)).unwrap();
+      // TODO: Pop a toast and redirect
+    } catch (error) {
+      // TODO: Pop a relevant toast for error
+    }
   };
 
   return (
