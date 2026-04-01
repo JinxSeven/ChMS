@@ -1,30 +1,41 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
+# BASE IMAGE
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 
-
-# This stage is used to build the service project
+# BUILD STAGE
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
 COPY ["api/api.csproj", "api/"]
 RUN dotnet restore "./api/api.csproj"
+
 COPY . .
 WORKDIR "/src/api"
 RUN dotnet build "./api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
+# PUBLISH STAGE
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# FINAL STAGE
 FROM base AS final
+
+# ✅ define UID properly
+ARG APP_UID=1000
+
+# install dependency as root
+USER root
+RUN apt-get update && \
+    apt-get install -y libkrb5-3 curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# switch to non-root
+USER ${APP_UID}
+
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "api.dll"]
