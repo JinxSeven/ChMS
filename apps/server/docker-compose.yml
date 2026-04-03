@@ -39,6 +39,81 @@
 #  chms_db_data:
 #    
 
+#services:
+#  api:
+#    image: ${DOCKER_REGISTRY-}api
+#    container_name: chms_api
+#    build:
+#      context: .
+#      dockerfile: api/Dockerfile
+#      args:
+#        APP_UID: 1000
+#
+#    environment:
+#      - ASPNETCORE_URLS=http://+:8080
+#
+#    ports:
+#      - "8080:8080"   # ❌ removed 8081 (no HTTPS)
+#
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#      loki:
+#        condition: service_started
+#
+#    # ✅ Added healthcheck (important)
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#
+#  database:
+#    image: postgres:18.3
+#    container_name: chms_db
+#
+#    environment:
+#      POSTGRES_DB: chms
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: letmein
+#
+#    volumes:
+#      - chms_db_data:/var/lib/postgresql   # ✅ correct for PG18+
+#
+#    ports:
+#      - "5432:5432"
+#
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U postgres -d chms"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 5s
+#
+#  loki:
+#    image: grafana/loki:2.9.0
+#    container_name: chms_loki
+#    ports:
+#      - "3100:3100"
+#
+#  grafana:
+#    image: grafana/grafana:10.4.0
+#    container_name: chms_grafana
+#
+#    ports:
+#      - "3000:3000"
+#
+#    depends_on:
+#      - loki
+#
+#    environment:
+#      GF_SECURITY_ADMIN_USER: admin
+#      GF_SECURITY_ADMIN_PASSWORD: admin
+#
+#volumes:
+#  chms_db_data:
+
+
 services:
   api:
     image: ${DOCKER_REGISTRY-}api
@@ -53,20 +128,11 @@ services:
       - ASPNETCORE_URLS=http://+:8080
 
     ports:
-      - "8080:8080"   # ❌ removed 8081 (no HTTPS)
+      - "8080:8080"
 
     depends_on:
-      database:
-        condition: service_healthy
-      loki:
-        condition: service_started
-
-    # ✅ Added healthcheck (important)
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - database
+      - otel-collector
 
   database:
     image: postgres:18.3
@@ -78,37 +144,58 @@ services:
       POSTGRES_PASSWORD: letmein
 
     volumes:
-      - chms_db_data:/var/lib/postgresql   # ✅ correct for PG18+
+      - chms_db_data:/var/lib/postgresql
 
     ports:
       - "5432:5432"
 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d chms"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-
+  #LOKI
   loki:
     image: grafana/loki:2.9.0
     container_name: chms_loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./api/loki-config.yaml:/etc/loki/loki-config.yaml
     ports:
       - "3100:3100"
 
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: chms_promtail
+  #TEMPO
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: chms_tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./api/tempo-config.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+
+  #PROMETHEUS
+  prometheus:
+    image: prom/prometheus
+    container_name: chms_prometheus
+    volumes:
+      - ./api/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  #OTEL COLLECTOR (CORE)
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: chms_otel
+    command: ["--config=/etc/otel/config.yaml"]
 
     volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./api/promtail-config.yml:/etc/promtail/config.yml
+      - ./api/otel-config.yaml:/etc/otel/config.yaml
 
-    command: -config.file=/etc/promtail/config.yml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "9464:9464"
 
     depends_on:
       - loki
+      - tempo
+      - prometheus
 
   grafana:
     image: grafana/grafana:10.4.0
@@ -117,12 +204,14 @@ services:
     ports:
       - "3000:3000"
 
-    depends_on:
-      - loki
-
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
 
 volumes:
   chms_db_data:

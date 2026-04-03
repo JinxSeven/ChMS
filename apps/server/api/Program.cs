@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +24,42 @@ var builder = WebApplication.CreateBuilder(args);
  * To put it plainly, .AddControllers() alone finds controllers in the main assembly
  * .AddApplicationPart(typeof(AuthModule).Assembly) tells it to also search in Evently.Modules.Auth.dll
  */
+builder.Logging.ClearProviders();
+
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.IncludeScopes = true;
+    options.ParseStateValues = true;
+
+    options.AddOtlpExporter(otlp =>
+    {
+        otlp.Endpoint = new Uri("http://otel-collector:4317");
+    });
+});
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri("http://otel-collector:4317");
+            });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri("http://otel-collector:4317");
+            });
+    });
+
+
 builder
     .Services.AddControllers()
     .ConfigureApplicationPartManager(manager =>
