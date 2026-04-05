@@ -8,8 +8,8 @@ namespace ChMS.Modules.Auth.Core.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UserRole
     {
-        SuperAdmin = 1,
-        Admin = 2,
-        User = 3,
+        SuperAdmin = 0,
+        Admin = 1,
+        User = 2,
     }
 }

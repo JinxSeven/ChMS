@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChMS.Modules.Auth.Controllers
 {
+    [ApiController]
     [Route("api/user")]
     public class UserController(UserService userService) : ControllerBase
     {
