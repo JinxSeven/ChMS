@@ -151,7 +151,7 @@ services:
 
   #LOKI
   loki:
-    image: grafana/loki:2.9.0
+    image: grafana/loki:3.0.0
     container_name: chms_loki
     command: -config.file=/etc/loki/loki-config.yaml
     volumes:
