@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChMS.Modules.Auth.Database.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260329154341_UserTable")]
-    partial class UserTable
+    [Migration("20260414143635_AddHasOnboardedColumn")]
+    partial class AddHasOnboardedColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace ChMS.Modules.Auth.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<bool>("HasOnboarded")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
