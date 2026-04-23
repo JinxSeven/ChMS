@@ -35,7 +35,11 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
         serviceVersion: "1.0.0");
 
 //LOGGING
-builder.Logging.ClearProviders();
+// builder.Logging.ClearProviders();
+
+var otelEndpoint =
+    builder.Configuration["Otel:Endpoint"]
+    ?? throw new InvalidOperationException("Otel:Endpoint is missing in appsettings.json");
 
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -47,7 +51,7 @@ builder.Logging.AddOpenTelemetry(options =>
 
     options.AddOtlpExporter(otlp =>
     {
-        otlp.Endpoint = new Uri("http://otel-collector:4317");
+        otlp.Endpoint = new Uri(otelEndpoint);
     });
 });
 
@@ -62,7 +66,7 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(otlp =>
             {
-                otlp.Endpoint = new Uri("http://otel-collector:4317");
+                otlp.Endpoint = new Uri(otelEndpoint);
             });
     })
     .WithMetrics(metrics =>
@@ -73,7 +77,7 @@ builder.Services.AddOpenTelemetry()
             .AddRuntimeInstrumentation()
             .AddOtlpExporter(otlp =>
             {
-                otlp.Endpoint = new Uri("http://otel-collector:4317");
+                otlp.Endpoint = new Uri(otelEndpoint);
             });
     });
 
@@ -123,7 +127,7 @@ builder
             ValidAudience = jwtSettings.Audience,
 
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-            
+
             // JWT by default adds 5 more mins on top of given expiration
             // This line prevents that from happening
             ClockSkew = TimeSpan.Zero,
