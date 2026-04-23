@@ -156,6 +156,7 @@ services:
     command: -config.file=/etc/loki/loki-config.yaml
     volumes:
       - ./api/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki_data:/loki
     ports:
       - "3100:3100"
 
@@ -166,6 +167,7 @@ services:
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./api/tempo-config.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
     ports:
       - "3200:3200"
 
@@ -175,6 +177,7 @@ services:
     container_name: chms_prometheus
     volumes:
       - ./api/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     ports:
       - "9090:9090"
 
@@ -207,6 +210,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+    
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./api/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
 
     depends_on:
       - loki
@@ -215,3 +222,7 @@ services:
 
 volumes:
   chms_db_data:
+  loki_data:
+  tempo_data:
+  prometheus_data:
+  grafana_data:
