@@ -8,11 +8,9 @@ services:
       args:
         APP_UID: 1000
 
-    environment:
-      - ASPNETCORE_URLS=http://+:8080
-
     ports:
       - "8080:8080"
+      - "8081:8081"
 
     depends_on:
       - database
@@ -39,7 +37,7 @@ services:
     container_name: chms_loki
     command: -config.file=/etc/loki/loki-config.yaml
     volumes:
-      - ./api/loki-config.yaml:/etc/loki/loki-config.yaml
+      - ./otel/loki-config.yaml:/etc/loki/loki-config.yaml
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -50,7 +48,7 @@ services:
     container_name: chms_tempo
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
-      - ./api/tempo-config.yaml:/etc/tempo.yaml
+      - ./otel/tempo-config.yaml:/etc/tempo.yaml
       - tempo_data:/tmp/tempo
     ports:
       - "3200:3200"
@@ -60,7 +58,7 @@ services:
     image: prom/prometheus
     container_name: chms_prometheus
     volumes:
-      - ./api/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./otel/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
@@ -72,7 +70,7 @@ services:
     command: ["--config=/etc/otel/config.yaml"]
 
     volumes:
-      - ./api/otel-config.yaml:/etc/otel/config.yaml
+      - ./otel/otel-config.yaml:/etc/otel/config.yaml
 
     ports:
       - "4317:4317"
@@ -93,11 +91,11 @@ services:
 
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin@123
     
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./api/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./otel/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
 
     depends_on:
       - loki
