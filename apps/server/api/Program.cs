@@ -1,4 +1,5 @@
 using System.Text;
+using System.Diagnostics;
 using api.Extensions;
 using ChMS.Modules.Auth;
 using ChMS.Modules.Auth.Application.Settings;
@@ -6,6 +7,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +27,61 @@ var builder = WebApplication.CreateBuilder(args);
  * To put it plainly, .AddControllers() alone finds controllers in the main assembly
  * .AddApplicationPart(typeof(AuthModule).Assembly) tells it to also search in Evently.Modules.Auth.dll
  */
+
+//Define shared resource
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(
+        serviceName: "chms-api",
+        serviceVersion: "1.0.0");
+
+//LOGGING
+// builder.Logging.ClearProviders();
+
+var otelEndpoint =
+    builder.Configuration["Otel:Endpoint"]
+    ?? throw new InvalidOperationException("Otel:Endpoint is missing in appsettings.json");
+
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.SetResourceBuilder(resourceBuilder);
+
+    options.IncludeScopes = true;
+    options.ParseStateValues = true;
+    options.IncludeFormattedMessage = true;
+
+    options.AddOtlpExporter(otlp =>
+    {
+        otlp.Endpoint = new Uri(otelEndpoint);
+    });
+});
+
+//OTEL
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("chms-api"))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .SetResourceBuilder(resourceBuilder)
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(otelEndpoint);
+            });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .SetResourceBuilder(resourceBuilder)
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(otelEndpoint);
+            });
+    });
+
+//CONTROLLERS
 builder
     .Services.AddControllers()
     .ConfigureApplicationPartManager(manager =>
@@ -36,9 +98,11 @@ builder.Services.AddOpenApi(
     }
 );
 
+//ERROR HANDLING
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+//AUTH 
 builder.Services.AddAuthModule(builder.Configuration);
 
 var jwtSettings =
@@ -71,6 +135,7 @@ builder
         };
     });
 
+//CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(

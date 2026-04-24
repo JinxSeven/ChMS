@@ -1,5 +1,3 @@
-name: chms_server
-
 services:
   api:
     image: ${DOCKER_REGISTRY-}api
@@ -7,34 +5,106 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
+      args:
+        APP_UID: 1000
+
     ports:
-    - "8080:8080"
-    - "8081:8081"
-    # environment:
-    #   - ASPNETCORE_URLS=http://+:8080
-    # depends_on:
-    #   database:
-    #     condition: service_healthy
+      - "8080:8080"
+      # - "8081:8081"
+
+    depends_on:
+      - database
+      - otel-collector
 
   database:
     image: postgres:18.3
     container_name: chms_db
+
     environment:
-      - POSTGRES_DB=chms
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=letmein
-    # This is causing an issue, so I've commented it out for now
-    # Volumes help us persist data in table even when conatiners are deleted
+      POSTGRES_DB: chms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: letmein
+
     volumes:
       - chms_db_data:/var/lib/postgresql
-    # healthcheck:
-    #   test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-    #   interval: 5s
-    #   timeout: 5s
-    #   retries: 5
+
     ports:
-      - 5432:5432
+      - "5432:5432"
+
+  #LOKI
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: chms_loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./otel/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  #TEMPO
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: chms_tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./otel/tempo-config.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"
+
+  #PROMETHEUS
+  prometheus:
+    image: prom/prometheus
+    container_name: chms_prometheus
+    volumes:
+      - ./otel/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  #OTEL COLLECTOR (CORE)
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: chms_otel
+    command: ["--config=/etc/otel/config.yaml"]
+
+    volumes:
+      - ./otel/otel-config.yaml:/etc/otel/config.yaml
+
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "9464:9464"
+
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: chms_grafana
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin@123
+    
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./otel/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
 
 volumes:
   chms_db_data:
-    
+  loki_data:
+  tempo_data:
+  prometheus_data:
+  grafana_data:
