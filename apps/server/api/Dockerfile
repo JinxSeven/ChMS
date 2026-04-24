@@ -2,6 +2,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
+# EXPOSE 8081
 
 # BUILD STAGE
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -23,7 +24,7 @@ RUN dotnet publish "./api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Use
 # FINAL STAGE
 FROM base AS final
 
-# ✅ define UID properly
+# define UID properly
 ARG APP_UID=1000
 
 # install dependency as root
