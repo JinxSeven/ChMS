@@ -15,3 +15,12 @@ This markdown lists all core database tables and their columns along with its ty
 | is_active     | Boolean   | Default: true             |
 | created_at    | Timestamp |                           |
 | updated_at    | Timestamp |                           |
+
+## 2. families (Central Unit for Families)
+
+| Column      | Type   | Notes / Constraints    |
+| ----------- | ------ | ---------------------- |
+| id          | UUID   | Primary Key            |
+| user_id     | UUID   | Foreign Key to users   |
+| family_name | String | e.g., "Livingston"     |
+| home_phone  | String | Primary contact number |
