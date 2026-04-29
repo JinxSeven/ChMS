@@ -22,7 +22,6 @@ This markdown lists all core database tables and their columns along with its ty
 | ----------- | --------- | --------------------------------------- |
 | id          | UUID      | Primary Key                             |
 | user_id     | UUID      | Foreign Key -> users                    |
-| family_name | String    | e.g., "Livingston"                      |
 | home_phone  | String    | Primary contact number                  |
 | address     | Text      | Full address (street, city, state, pin) |
 | annual_dues | Decimal   | e.g., 1200.00 (nullable)                |
