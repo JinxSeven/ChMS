@@ -32,19 +32,20 @@ This markdown lists all core database tables and their columns along with its ty
 
 ## 3. family_members (Links members to families)
 
-| Column     | Type      | Notes / Constraints      |
-| ---------- | --------- | ------------------------ |
-| id         | UUID      | Primary Key              |
-| user_id    | UUID      | Foreign Key -> users     |
-| family_id  | UUID      | Foreign Key -> families  |
-| name       | String    | User's full name         |
-| email      | String    | Unique, indexed          |
-| phone      | String    | Primary contact number   |
-| gender     | Enum      | male, female             |
-| dob        | Date      | Date of Birth            |
-| is_primary | Boolean   | True for primary contact |
-| created_at | Timestamp |                          |
-| updated_at | Timestamp |                          |
+| Column          | Type      | Notes / Constraints      |
+| --------------- | --------- | ------------------------ |
+| id              | UUID      | Primary Key              |
+| user_id         | UUID      | Foreign Key -> users     |
+| family_id       | UUID      | Foreign Key -> families  |
+| name            | String    | User's full name         |
+| email           | String    | Unique, indexed          |
+| primary_phone   | String    | Primary contact number   |
+| secondary_phone | String    | Primary contact number   |
+| gender          | Enum      | male, female             |
+| dob             | Date      | Date of Birth            |
+| is_primary      | Boolean   | True for primary contact |
+| created_at      | Timestamp |                          |
+| updated_at      | Timestamp |                          |
 
 ## 4. family_relationship (Links members to members)
 
@@ -58,5 +59,5 @@ This markdown lists all core database tables and their columns along with its ty
 | start_date        | Date      | marriage date, guardianship start        |
 | end_date          | Date      | divorce, ended relation                  |
 | is_active         | Boolean   | current relationship                     |
-| created_at        | Timestamp |
-| updated_at        | Timestamp |
+| created_at        | Timestamp |                                          |
+| updated_at        | Timestamp |                                          |
