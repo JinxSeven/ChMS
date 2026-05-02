@@ -16,7 +16,7 @@ This markdown lists all core database tables and their columns along with its ty
 | created_at    | Timestamp |                           |
 | updated_at    | Timestamp |                           |
 
-## 2. families (Central Unit for Families)
+## 2. families (Central Unit for families)
 
 | Column     | Type      | Notes / Constraints                     |
 | ---------- | --------- | --------------------------------------- |
@@ -47,7 +47,7 @@ This markdown lists all core database tables and their columns along with its ty
 | created_at      | Timestamp |                         |
 | updated_at      | Timestamp |                         |
 
-## 4. family_relationship (Links members to members)
+## 4. family_relationship (Links member to member relationships)
 
 | Column            | Type      | Notes / Constraints                      |
 | ----------------- | --------- | ---------------------------------------- |
@@ -56,7 +56,19 @@ This markdown lists all core database tables and their columns along with its ty
 | member_id         | UUID      | FK -> family_members                     |
 | related_member_id | UUID      | FK -> family_members                     |
 | relationship_type | Enum      | spouse, parent, child, sibling, guardian |
-| start_date        | Date      | marriage date, guardianship start        |
-| end_date          | Date      | divorce, ended relation                  |
+| started_on        | Date      | marriage date, guardianship start        |
+| ended_on          | Date      | divorce, ended relation                  |
 | created_at        | Timestamp |                                          |
 | updated_at        | Timestamp |                                          |
+
+## 5. auction_dues (Links families to their dues)
+
+| Column          | Type      | Notes / Constraints |
+| --------------- | --------- | ------------------- |
+| id              | UUID      | PK                  |
+| family_id       | UUID      | FK -> families      |
+| auction_held_on | Date      | Date of auction     |
+| due_amount      | Decimal   | Amount to be paid   |
+| due_on          | Date      | Due date            |
+| created_at      | Timestamp |                     |
+| updated_at      | Timestamp |                     |
