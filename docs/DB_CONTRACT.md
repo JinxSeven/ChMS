@@ -18,16 +18,19 @@ This markdown lists all core database tables and their columns along with its ty
 
 ## 2. families (Central Unit for families)
 
-| Column     | Type      | Notes / Constraints                     |
-| ---------- | --------- | --------------------------------------- |
-| id         | UUID      | Primary Key                             |
-| user_id    | UUID      | Foreign Key -> users                    |
-| home_phone | String    | Primary contact number                  |
-| address    | Text      | Full address (street, city, state, pin) |
-| status     | Enum      | active, inactive, moved                 |
-| notes      | Text      | Admin note (only visible to admin)      |
-| created_at | Timestamp |                                         |
-| updated_at | Timestamp |                                         |
+| Column         | Type      | Notes / Constraints                |
+| -------------- | --------- | ---------------------------------- |
+| id             | UUID      | Primary Key                        |
+| user_id        | UUID      | Foreign Key -> users               |
+| primary_phone  | String    | Primary contact number             |
+| address_line_1 | Text      | House number & street address      |
+| address_line_2 | Text      | Apt, Floor                         |
+| city           | Text      | City or Town name                  |
+| pin_code       | Int       | Area pin code                      |
+| status         | Enum      | active, inactive, moved            |
+| notes          | Text      | Admin note (only visible to admin) |
+| created_at     | Timestamp |                                    |
+| updated_at     | Timestamp |                                    |
 
 ## 3. family_members (Links members to families)
 
