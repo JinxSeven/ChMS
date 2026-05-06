@@ -6,7 +6,7 @@ This markdown lists all core database tables and their columns along with its ty
 
 | Column        | Type      | Notes / Constraints       |
 | ------------- | --------- | ------------------------- |
-| id            | UUID      | Primary Key               |
+| id            | UUID      | PK                        |
 | name          | String    | User's full name          |
 | email         | String    | Unique, indexed           |
 | password      | String    | Hashed                    |
@@ -18,37 +18,37 @@ This markdown lists all core database tables and their columns along with its ty
 
 ## 2. families (Central Unit for families)
 
-| Column         | Type      | Notes / Constraints                |
-| -------------- | --------- | ---------------------------------- |
-| id             | UUID      | Primary Key                        |
-| user_id        | UUID      | Foreign Key -> users               |
-| primary_phone  | String    | Primary contact number             |
-| address_line_1 | Text      | House number & street address      |
-| address_line_2 | Text      | Apt, Floor                         |
-| city           | Text      | City or Town name                  |
-| pin_code       | Int       | Area pin code                      |
-| status         | Enum      | active, inactive, moved            |
-| notes          | Text      | Admin note (only visible to admin) |
-| created_at     | Timestamp |                                    |
-| updated_at     | Timestamp |                                    |
+| Column        | Type      | Notes / Constraints                |
+| ------------- | --------- | ---------------------------------- |
+| id            | UUID      | PK                                 |
+| user_id       | UUID      | FK -> users                        |
+| primary_phone | String    | Primary contact number             |
+| address       | Text      | House number & street address      |
+| address_info  | Text      | Apt, building, floor - nullable    |
+| city          | Text      | City or Town name                  |
+| pin_code      | Int       | Area pin code                      |
+| status        | Enum      | active, inactive, moved            |
+| family_notes  | Text      | Admin note (only visible to admin) |
+| created_at    | Timestamp |                                    |
+| updated_at    | Timestamp |                                    |
 
 ## 3. family_members (Links members to families)
 
-| Column          | Type      | Notes / Constraints     |
-| --------------- | --------- | ----------------------- |
-| id              | UUID      | Primary Key             |
-| user_id         | UUID      | Foreign Key -> users    |
-| family_id       | UUID      | Foreign Key -> families |
-| name            | String    | User's full name        |
-| email           | String    | Unique, indexed         |
-| primary_phone   | String    | Primary contact number  |
+| Column          | Type      | Notes / Constraints      |
+| --------------- | --------- | ------------------------ |
+| id              | UUID      | PK                       |
+| user_id         | UUID      | FK -> users              |
+| family_id       | UUID      | FK -> families           |
+| name            | String    | User's full name         |
+| email           | String    | Unique, indexed          |
+| primary_phone   | String    | Primary contact number   |
 | secondary_phone | String    | Secondary contact number |
-| gender          | Enum      | male, female            |
-| dob             | Date      | Date of Birth           |
-| is_primary      | Boolean   |                         |
-| is_alive        | Boolean   | Default true            |
-| created_at      | Timestamp |                         |
-| updated_at      | Timestamp |                         |
+| gender          | Enum      | male, female             |
+| dob             | Date      | Date of Birth            |
+| is_primary      | Boolean   |                          |
+| is_alive        | Boolean   | Default true             |
+| created_at      | Timestamp |                          |
+| updated_at      | Timestamp |                          |
 
 ## 4. family_relationship (Links member to member relationships)
 
