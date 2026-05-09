@@ -5,13 +5,13 @@ datasources:
     type: prometheus
     access: proxy
     url: http://chms_prometheus:9090
-    isDefault: true
     editable: true
 
   - name: Loki
     type: loki
     access: proxy
     url: http://chms_loki:3100
+    isDefault: true
     editable: true
 
   - name: Tempo
