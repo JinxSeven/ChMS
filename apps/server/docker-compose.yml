@@ -10,6 +10,7 @@ services:
 
     ports:
       - "8080:8080"
+      # Uncomment HTTPS port for Visual Studio .dcproj | Leave it commented for Docker Compose.
       # - "8081:8081"
 
     depends_on:
@@ -37,28 +38,30 @@ services:
     container_name: chms_loki
     command: -config.file=/etc/loki/loki-config.yaml
     volumes:
-      - ./otel/loki-config.yaml:/etc/loki/loki-config.yaml
+      - ./otel/loki-config.yml:/etc/loki/loki-config.yaml
       - loki_data:/loki
     ports:
       - "3100:3100"
 
   #TEMPO
   tempo:
+    profiles: [OTEL]
     image: grafana/tempo:2.4.1
     container_name: chms_tempo
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
-      - ./otel/tempo-config.yaml:/etc/tempo.yaml
+      - ./otel/tempo-config.yml:/etc/tempo.yaml
       - tempo_data:/tmp/tempo
     ports:
       - "3200:3200"
 
   #PROMETHEUS
   prometheus:
+    profiles: [OTEL]
     image: prom/prometheus
     container_name: chms_prometheus
     volumes:
-      - ./otel/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./otel/prometheus-config.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
@@ -70,17 +73,17 @@ services:
     command: ["--config=/etc/otel/config.yaml"]
 
     volumes:
-      - ./otel/otel-config.yaml:/etc/otel/config.yaml
+      - ./otel/otel-config.yml:/etc/otel/config.yaml
 
     ports:
       - "4317:4317"
-      - "4318:4318"
-      - "9464:9464"
+      # - "4318:4318"
+      # - "9464:9464"
 
     depends_on:
       - loki
-      - tempo
-      - prometheus
+      # - tempo
+      # - prometheus
 
   grafana:
     image: grafana/grafana:10.4.0
@@ -99,8 +102,8 @@ services:
 
     depends_on:
       - loki
-      - tempo
-      - prometheus
+      # - tempo
+      # - prometheus
 
 volumes:
   chms_db_data:
