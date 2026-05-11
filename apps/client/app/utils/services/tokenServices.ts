@@ -1,8 +1,7 @@
 const ACCESS_TOKEN_NAME = "access-token-chms";
 
-export const setAccessToken = (token: string, expiresOn: string) => {
-  const maxAge = Math.floor(new Date(expiresOn).getTime() - Date.now() / 1000);
-  document.cookie = `${ACCESS_TOKEN_NAME}=${token}; path=/; max-age=${maxAge}; SameSite=Strict`;
+export const setAccessToken = (token: string) => {
+  document.cookie = `${ACCESS_TOKEN_NAME}=${token}; path=/; SameSite=Strict`;
 };
 
 export const getAccessToken = () => {

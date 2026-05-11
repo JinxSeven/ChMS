@@ -13,7 +13,7 @@ const initialState: AuthState = {
 export const signIn = createAsyncThunk("auth/signin", async (data: SignInRequest, thunkAPI) => {
   try {
     const response = await signInUser(data);
-    setAccessToken(response.accessToken, response.expiresOn);
+    setAccessToken(response.accessToken);
     return response;
   } catch (error: any) {
     return thunkAPI.rejectWithValue({

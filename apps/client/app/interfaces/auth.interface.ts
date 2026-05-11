@@ -31,7 +31,6 @@ export interface User {
 
 export interface SignInResponse {
   accessToken: string;
-  expiresOn: string;
   user: User;
   hasOnboarded: boolean;
 }
