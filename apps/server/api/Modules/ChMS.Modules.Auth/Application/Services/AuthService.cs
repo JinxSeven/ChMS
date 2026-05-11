@@ -38,7 +38,7 @@ namespace ChMS.Modules.Auth.Application.Services
             return user.Id;
         }
 
-        public async Task<SignInResponse> Signin(string email, string password)
+        public async Task<(SignInResponse, string)> Signin(string email, string password)
         {
             var user =
                 await _db.Users.FirstOrDefaultAsync(u => u.Email == email) ?? throw new InvalidCredentialsException();
@@ -49,20 +49,24 @@ namespace ChMS.Modules.Auth.Application.Services
             if (!user.IsActive)
                 throw new UnauthorizedAccessException($"Access Denied: Account is not active");
 
-            var (token, _) = _jwt.GenerateToken(user);
+            var (accessToken, _) = _jwt.GenerateToken(user);
+            var (refreshToken, _) = _jwt.GenerateToken(user, true);
 
-            return new SignInResponse
-            {
-                AccessToken = token,
-                User = new SignInResponse.UserInfo
+            return (
+                new SignInResponse
                 {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    Role = user.Role,
+                    AccessToken = accessToken,
+                    User = new SignInResponse.UserInfo
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Email = user.Email,
+                        Role = user.Role,
+                    },
+                    HasOnboarded = user.HasOnboarded,
                 },
-                HasOnboarded = user.HasOnboarded,
-            };
+                refreshToken
+            );
         }
     }
 }

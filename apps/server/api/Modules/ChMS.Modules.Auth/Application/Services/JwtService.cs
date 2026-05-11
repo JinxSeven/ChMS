@@ -18,8 +18,9 @@ namespace ChMS.Modules.Auth.Application.Services
             _jwtSettings = options.Value;
         }
 
-        public (string Token, DateTime ExpiresOn) GenerateToken(User user)
+        public (string Token, DateTime ExpiresOn) GenerateToken(User user, bool isRefreshToken = false)
         {
+            DateTime expiresOn;
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -29,7 +30,14 @@ namespace ChMS.Modules.Auth.Application.Services
                 new Claim("Role", user.Role.ToString()),
             };
 
-            var expiresOn = DateTime.UtcNow.AddMinutes(int.Parse(_jwtSettings.ExpirationMinutes));
+            if (isRefreshToken)
+            {
+                expiresOn = DateTime.UtcNow.AddDays(7);
+            }
+            else
+            {
+                expiresOn = DateTime.UtcNow.AddMinutes(int.Parse(_jwtSettings.ExpirationMinutes));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
 

@@ -1,5 +1,6 @@
 using ChMS.Modules.Auth.Application.Services;
 using ChMS.Modules.Auth.Core.DTOs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,9 +30,26 @@ namespace ChMS.Modules.Auth.Controllers
         }
 
         [HttpPost("signin")]
-        public async Task<IActionResult> Signin(LoginRequest req)
+        public async Task<IActionResult> Signin(SignInRequest req)
         {
-            SignInResponse res = await _auth.Signin(req.Email, req.Password);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (res, refreshToken) = await _auth.Signin(req.Email, req.Password);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/",
+                IsEssential = true,
+            };
+            Response.Cookies.Append("refresh-token-chms", refreshToken, cookieOptions);
+
             return Ok(res);
         }
     }
