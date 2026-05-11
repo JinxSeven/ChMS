@@ -9,7 +9,6 @@ namespace ChMS.Modules.Auth.Core.DTOs
     public class SignInResponse
     {
         public required string AccessToken { get; set; }
-        public DateTime ExpiresOn { get; set; }
         public required UserInfo User { get; set; }
         public required bool HasOnboarded { get; set; }
 

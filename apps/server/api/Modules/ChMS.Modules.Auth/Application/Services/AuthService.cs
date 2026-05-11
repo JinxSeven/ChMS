@@ -49,12 +49,11 @@ namespace ChMS.Modules.Auth.Application.Services
             if (!user.IsActive)
                 throw new UnauthorizedAccessException($"Access Denied: Account is not active");
 
-            var (token, expiresOn) = _jwt.GenerateToken(user);
+            var (token, _) = _jwt.GenerateToken(user);
 
             return new SignInResponse
             {
                 AccessToken = token,
-                ExpiresOn = expiresOn,
                 User = new SignInResponse.UserInfo
                 {
                     Id = user.Id,
