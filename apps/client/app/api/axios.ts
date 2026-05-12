@@ -9,9 +9,9 @@ const API = axios.create({
 const excludedEndpoints = ["/signin", "/signup"];
 
 // Interceptor
-API.interceptors.response.use(
+API.interceptors.request.use(
   (req) => {
-    const url = req.config?.url;
+    const url = req.url;
 
     const containsExcludedEndpoints = excludedEndpoints.some((endpoint) =>
       url?.includes(endpoint),
@@ -27,6 +27,11 @@ API.interceptors.response.use(
 
     return req;
   },
+  (error) => Promise.reject(error)
+);
+
+API.interceptors.response.use(
+  (res) => res,
   (error) => {
     const status = error.response?.status;
     const url = error.config?.url;
