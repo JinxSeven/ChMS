@@ -20,7 +20,6 @@ namespace ChMS.Modules.Auth.Application.Services
 
         public (string Token, DateTime ExpiresOn) GenerateToken(User user, bool isRefreshToken = false)
         {
-            DateTime expiresOn;
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -30,14 +29,7 @@ namespace ChMS.Modules.Auth.Application.Services
                 new Claim("Role", user.Role.ToString()),
             };
 
-            if (isRefreshToken)
-            {
-                expiresOn = DateTime.UtcNow.AddDays(7);
-            }
-            else
-            {
-                expiresOn = DateTime.UtcNow.AddMinutes(int.Parse(_jwtSettings.ExpirationMinutes));
-            }
+            DateTime expiresOn = DateTime.UtcNow.AddMinutes(int.Parse(_jwtSettings.ExpirationMinutes));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
 
@@ -46,8 +38,8 @@ namespace ChMS.Modules.Auth.Application.Services
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: expiresOn,
+                claims: isRefreshToken ? null : claims,
+                expires: isRefreshToken ? DateTime.UtcNow.AddDays(7) : expiresOn,
                 signingCredentials: creds
             );
 

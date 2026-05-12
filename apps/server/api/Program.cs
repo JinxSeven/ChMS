@@ -83,7 +83,7 @@ builder
     {
         manager.ApplicationParts.Add(new AssemblyPart(typeof(AuthModule).Assembly));
     });
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi(
     "v1",
