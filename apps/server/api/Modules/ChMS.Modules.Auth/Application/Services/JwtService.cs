@@ -39,7 +39,7 @@ namespace ChMS.Modules.Auth.Application.Services
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: isRefreshToken ? null : claims,
-                expires: isRefreshToken ? DateTime.UtcNow.AddDays(7) : expiresOn,
+                expires: isRefreshToken ? null : expiresOn,
                 signingCredentials: creds
             );
 
