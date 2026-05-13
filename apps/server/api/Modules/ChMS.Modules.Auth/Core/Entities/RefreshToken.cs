@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChMS.Modules.Auth.Core.Entities
 {
     [Index(nameof(HashedToken), IsUnique = true)]
-    [Index(nameof(UserId), nameof(IsActive), Name = "IX_Active_User_RefreshTokens")] // Indexing for faster user token lookup
+    [Index(nameof(UserId), nameof(RevokedAt), nameof(ExpiresAt), Name = "IX_Active_User_RefreshTokens")] // Indexing for faster user token lookup
     public class RefreshToken
     {
         [Key]
