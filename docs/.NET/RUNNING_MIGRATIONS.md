@@ -11,7 +11,7 @@ You must run from the `apps/server/api/` directory (where `api.csproj` is).
 If using `Visual Studio` use Package Manager Console (Shortcut: Alt + T, N, O)
 
 ```bash
-Add-Migration <MigrationName> -StartupProject api -Project ChMS.Modules.<ModuleName> -Context <ModuleDbContext> -OutputDir Database\Migrations
+Add-Migration <MigrationName> -StartupProject api -Project ChMS.Modules.<ModuleName> -Context ChMS.Modules.<ModuleName>.Database.<ModuleDbContext> -OutputDir Database\Migrations
 ```
 
 Else
@@ -85,6 +85,17 @@ context.Database.Migrate();  // in RunMigrations()
 ```
 
 **Option B: Via CLI:**
+
+Precondition: Docker containers must be running
+
+If you're using Visual Studio, you could use Package Manager Console (Shortcut: Alt + T, N, O)
+
+```bash
+Update-Database `
+  -Project ChMS.Modules.<ModuleName>
+  -StartupProject api
+  -Context ChMS.Modules.<ModuleName>.Database.<ModuleDbContext>
+```
 
 ```bash
 dotnet ef database update \
