@@ -1,15 +1,22 @@
+using System.Security;
 using ChMS.Modules.Auth.Core.DTOs;
 using ChMS.Modules.Auth.Core.Entities;
 using ChMS.Modules.Auth.Database;
 using ChMS.Modules.Auth.Infrastructure;
 using EZXception.Authorization;
 using EZXception.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChMS.Modules.Auth.Application.Services
 {
-    public class AuthService(AuthDbContext authDbContext, JwtService jwtService)
+    public class AuthService(
+        AuthDbContext authDbContext,
+        JwtService jwtService,
+        IHttpContextAccessor httpContextAccessor
+    )
     {
+        private readonly IHttpContextAccessor _httpContextAccess = httpContextAccessor;
         private readonly AuthDbContext _db = authDbContext;
         private readonly JwtService _jwt = jwtService;
 
@@ -32,7 +39,7 @@ namespace ChMS.Modules.Auth.Application.Services
                 UpdatedAt = DateTime.UtcNow,
             };
 
-            _db.Users.Add(user);
+            await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
 
             return user.Id;
@@ -40,6 +47,7 @@ namespace ChMS.Modules.Auth.Application.Services
 
         public async Task<(SignInResponse, string)> Signin(string email, string password)
         {
+            var httpContext = _httpContextAccess.HttpContext;
             var user =
                 await _db.Users.FirstOrDefaultAsync(u => u.Email == email) ?? throw new InvalidCredentialsException();
 
@@ -50,7 +58,21 @@ namespace ChMS.Modules.Auth.Application.Services
                 throw new UnauthorizedAccessException($"Access Denied: Account is not active");
 
             var (accessToken, _) = _jwt.GenerateToken(user);
-            var (refreshToken, _) = _jwt.GenerateToken(user, true);
+            var (refreshToken, _) = _jwt.GenerateToken(user, isRefreshToken: true);
+
+            var refreshTokenRecord = new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                HashedToken = PasswordHasher.HashPassword(refreshToken),
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                IpAddress = httpContext!.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = httpContext.Request.Headers.UserAgent.ToString(),
+            };
+
+            await _db.RefreshTokens.AddAsync(refreshTokenRecord);
+            await _db.SaveChangesAsync();
 
             return (
                 new SignInResponse
@@ -68,5 +90,47 @@ namespace ChMS.Modules.Auth.Application.Services
                 refreshToken
             );
         }
+
+        public async Task<(string AccessToken, string RefreshToken)> RefreshTokenRotation(string currentRefreshToken)
+        {
+            var httpContext = _httpContextAccess.HttpContext;
+            currentRefreshToken = PasswordHasher.HashPassword(currentRefreshToken);
+
+            var currentRefreshTokenRecord = await _db.RefreshTokens.FirstOrDefaultAsync(rt =>
+                rt.HashedToken == currentRefreshToken
+            );
+
+            if (currentRefreshTokenRecord is null)
+                // Call method to revoke all user access
+                throw new SecurityException("Refresh Aborted: Invalid refresh token");
+
+            if (!currentRefreshTokenRecord.IsActive)
+                // Call method to revoke all user access
+                throw new SecurityException("Refresh Aborted: Refresh token not active");
+
+            var (accessToken, _) = _jwt.GenerateToken(currentRefreshTokenRecord.User!);
+            var (refreshToken, _) = _jwt.GenerateToken(currentRefreshTokenRecord.User!, isRefreshToken: true);
+
+            var rotatedTokenRecord = new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = currentRefreshTokenRecord.UserId,
+                HashedToken = PasswordHasher.HashPassword(refreshToken),
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                IpAddress = httpContext!.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = httpContext.Request.Headers.UserAgent.ToString(),
+            };
+
+            currentRefreshTokenRecord.RevokedAt = DateTime.UtcNow;
+            currentRefreshTokenRecord.ReplacedByTokenId = currentRefreshTokenRecord.Id;
+
+            await _db.AddAsync(rotatedTokenRecord);
+            await _db.SaveChangesAsync();
+
+            return (accessToken, refreshToken);
+        }
+
+        // TODO: Method to revoke all user access
     }
 }
