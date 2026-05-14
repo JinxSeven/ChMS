@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using EZXception.Authorization;
+using EZXception.Business;
 using EZXception.Data;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -46,10 +47,11 @@ namespace api.Extensions
                     message = ex.Message;
                     break;
 
-                case InvalidCredentialsException ex:
+                case InvalidCredentialsException
+                or UnauthorizedException:
                     statusCode = HttpStatusCode.Unauthorized;
                     logLevel = LogLevel.Warning;
-                    message = ex.Message;
+                    message = exception.Message;
                     break;
 
                 case UnauthorizedAccessException ex:
