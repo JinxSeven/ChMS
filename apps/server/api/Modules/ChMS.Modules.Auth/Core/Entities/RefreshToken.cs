@@ -37,6 +37,6 @@ namespace ChMS.Modules.Auth.Core.Entities
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
 
         [NotMapped]
-        public bool IsActive => RevokedAt == null && !IsExpired;
+        public bool IsRevoked => RevokedAt == null && !IsExpired;
     }
 }
