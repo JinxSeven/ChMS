@@ -4,6 +4,7 @@ using ChMS.Modules.Auth.Core.Entities;
 using ChMS.Modules.Auth.Database;
 using ChMS.Modules.Auth.Infrastructure;
 using EZXception.Authorization;
+using EZXception.Business;
 using EZXception.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ namespace ChMS.Modules.Auth.Application.Services
                 throw new InvalidCredentialsException();
 
             if (!user.IsActive)
-                throw new UnauthorizedAccessException($"Access Denied: Account is not active");
+                throw new OperationNotAllowedException("Login", $"Access Denied: Account is not active");
 
             var (accessToken, _) = _jwt.GenerateToken(user);
             var (refreshToken, _) = _jwt.GenerateToken(user, isRefreshToken: true);
@@ -64,9 +65,9 @@ namespace ChMS.Modules.Auth.Application.Services
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
-                HashedToken = PasswordHasher.HashPassword(refreshToken),
+                HashedToken = TokenHasher.HashToken(refreshToken),
                 CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                ExpiresAt = DateTime.UtcNow.AddDays(30),
                 IpAddress = httpContext!.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = httpContext.Request.Headers.UserAgent.ToString(),
             };
@@ -94,19 +95,18 @@ namespace ChMS.Modules.Auth.Application.Services
         public async Task<(string AccessToken, string RefreshToken)> RefreshTokenRotation(string currentRefreshToken)
         {
             var httpContext = _httpContextAccess.HttpContext;
-            currentRefreshToken = PasswordHasher.HashPassword(currentRefreshToken);
+            currentRefreshToken = TokenHasher.HashToken(currentRefreshToken);
 
-            var currentRefreshTokenRecord = await _db.RefreshTokens.FirstOrDefaultAsync(rt =>
-                rt.HashedToken == currentRefreshToken
-            );
+            var currentRefreshTokenRecord = await _db
+                .RefreshTokens.Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.HashedToken == currentRefreshToken);
 
-            if (currentRefreshTokenRecord is null)
-                // Call method to revoke all user access
-                throw new SecurityException("Refresh Aborted: Invalid refresh token");
+            if (currentRefreshTokenRecord is null || !currentRefreshTokenRecord.IsRevoked)
+                // TODO: Call method to revoke all user access
+                throw new SecurityException("Refresh Aborted: Inactive or invalid refresh token");
 
-            if (!currentRefreshTokenRecord.IsActive)
-                // Call method to revoke all user access
-                throw new SecurityException("Refresh Aborted: Refresh token not active");
+            if (currentRefreshTokenRecord.IsExpired)
+                throw new UnauthorizedException("Refresh Failed: Refresh token expired");
 
             var (accessToken, _) = _jwt.GenerateToken(currentRefreshTokenRecord.User!);
             var (refreshToken, _) = _jwt.GenerateToken(currentRefreshTokenRecord.User!, isRefreshToken: true);
@@ -117,13 +117,13 @@ namespace ChMS.Modules.Auth.Application.Services
                 UserId = currentRefreshTokenRecord.UserId,
                 HashedToken = PasswordHasher.HashPassword(refreshToken),
                 CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                ExpiresAt = DateTime.UtcNow.AddDays(30),
                 IpAddress = httpContext!.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = httpContext.Request.Headers.UserAgent.ToString(),
             };
 
             currentRefreshTokenRecord.RevokedAt = DateTime.UtcNow;
-            currentRefreshTokenRecord.ReplacedByTokenId = currentRefreshTokenRecord.Id;
+            currentRefreshTokenRecord.ReplacedByTokenId = rotatedTokenRecord.Id;
 
             await _db.AddAsync(rotatedTokenRecord);
             await _db.SaveChangesAsync();
