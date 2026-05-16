@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Security;
 using EZXception.Authorization;
 using EZXception.Business;
 using EZXception.Data;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace api.Extensions
 {
@@ -54,10 +56,13 @@ namespace api.Extensions
                     message = exception.Message;
                     break;
 
-                case UnauthorizedAccessException ex:
+                case UnauthorizedAccessException
+                or OperationNotAllowedException
+                or SecurityTokenValidationException
+                or SecurityException:
                     statusCode = HttpStatusCode.Forbidden;
                     logLevel = LogLevel.Warning;
-                    message = ex.Message;
+                    message = exception.Message;
                     break;
 
                 default:
