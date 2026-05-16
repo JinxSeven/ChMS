@@ -14,6 +14,18 @@ namespace ChMS.Modules.Auth.Core.Entities
         [Required]
         [ForeignKey(nameof(User))]
         public Guid UserId { get; set; }
+
+        /*
+         * VIRTUAL PROP
+
+         * virtual enables Lazy Loading in Entity Framework.
+         * When virtual is present, EF Core can create a proxy class (a wrapper) around your entity.
+         * This proxy allows EF to automatically load related data (like User) the first time you access refreshToken.User
+  
+         * Lazy Loading is disabled by default in modern EF Core projects (for performance reasons, and same goes to our project).
+         * Use .include() this tells Entity Framework Core to load related data (navigation properties) together with the main entity in a single query.
+         */
+
         public virtual User? User { get; set; }
 
         [Required]
