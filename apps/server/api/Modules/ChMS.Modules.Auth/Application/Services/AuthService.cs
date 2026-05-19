@@ -8,6 +8,7 @@ using EZXception.Business;
 using EZXception.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ChMS.Modules.Auth.Application.Services
 {
@@ -97,13 +98,17 @@ namespace ChMS.Modules.Auth.Application.Services
             var httpContext = _httpContextAccess.HttpContext;
             currentRefreshToken = TokenHasher.HashToken(currentRefreshToken);
 
-            var currentRefreshTokenRecord = await _db
-                .RefreshTokens.Include(rt => rt.User)
-                .FirstOrDefaultAsync(rt => rt.HashedToken == currentRefreshToken);
+            var currentRefreshTokenRecord =
+                await _db
+                    .RefreshTokens.Include(rt => rt.User)
+                    .FirstOrDefaultAsync(rt => rt.HashedToken == currentRefreshToken)
+                ?? throw new SecurityTokenValidationException("Refresh Aborted: Inactive or invalid refresh token");
 
-            if (currentRefreshTokenRecord is null || !currentRefreshTokenRecord.IsRevoked)
-                // TODO: Call method to revoke all user access
-                throw new SecurityException("Refresh Aborted: Inactive or invalid refresh token");
+            if (!currentRefreshTokenRecord.IsRevoked)
+            {
+                await RevokeUserTokenChainById(currentRefreshTokenRecord.UserId);
+                throw new SecurityTokenValidationException("Refresh Aborted: Inactive or invalid refresh token");
+            }
 
             if (currentRefreshTokenRecord.IsExpired)
                 throw new UnauthorizedException("Refresh Failed: Refresh token expired");
@@ -131,6 +136,16 @@ namespace ChMS.Modules.Auth.Application.Services
             return (accessToken, refreshToken);
         }
 
-        // TODO: Method to revoke all user access
+        public async Task RevokeUserTokenChainById(Guid userId)
+        {
+            var matchingUserTokenRecords = await _db
+                .RefreshTokens.Where(rt => rt.UserId == userId && rt.RevokedAt == null)
+                .ToListAsync();
+
+            foreach (var matchingUserTokenRecord in matchingUserTokenRecords)
+                matchingUserTokenRecord.RevokedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+        }
     }
 }
