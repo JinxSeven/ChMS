@@ -16,3 +16,7 @@ export async function signInUser(data: SignInRequest): Promise<SignInResponse> {
 export async function signUpUser(data: SignUpRequest): Promise<Partial<User>> {
   return (await API.post<Partial<User>>(`/${RESOURCE_NAME}/signup`, data)).data;
 }
+
+export async function refreshToken(): Promise<{ accessToken: string }> {
+  return (await API.post<{ accessToken: string }>(`/${RESOURCE_NAME}/refresh`)).data;
+}
